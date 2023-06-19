@@ -1,0 +1,9 @@
+node_modules
+public
+build
+**/.{git,svn,hg}/**
+./.{git,svn,hg}/**
+*.md
+*.asax
+*.csproj
+*.sln
