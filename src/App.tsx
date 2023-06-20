@@ -1,18 +1,40 @@
-import { Routes, Route, Link } from 'react-router-dom'
+import { createContext, useState, Dispatch } from 'react'
+import { Routes, Route } from 'react-router-dom'
 
 import Layout from './components/Layout'
 import Home from './pages/Home'
 import Details from './pages/Details'
 
-const App = () => {
-	return (
-		<Routes>
-			<Route path="/" element={<Layout />}>
-				<Route index element={<Home />} />
+interface MovieProps {
+	Poster: string
+	Title: string
+	Year: string
+	imdbID: string
+}
 
-				<Route path=":id" element={<Details />} />
-			</Route>
-		</Routes>
+export interface MoviesContextProps {
+	movies: MovieProps[] | []
+	setMovies: Dispatch<React.SetStateAction<MovieProps[] | []>>
+}
+
+export const MoviesContext = createContext<MoviesContextProps>({
+	movies: [],
+	setMovies: () => {}
+})
+
+const App = () => {
+	const [movies, setMovies] = useState<MovieProps[] | []>([])
+
+	return (
+		<MoviesContext.Provider value={{ movies: movies, setMovies: setMovies }}>
+			<Routes>
+				<Route path="/" element={<Layout />}>
+					<Route index element={<Home />} />
+
+					<Route path=":id" element={<Details />} />
+				</Route>
+			</Routes>
+		</MoviesContext.Provider>
 	)
 }
 

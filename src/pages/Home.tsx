@@ -1,12 +1,7 @@
-import { useState, useEffect, ReactElement, FC } from 'react'
+import { useState, useMemo, ReactElement, FC, useContext } from 'react'
 import { Link } from 'react-router-dom'
 
-interface MovieProps {
-	Poster: string
-	Title: string
-	Year: string
-	imdbID: string
-}
+import { MoviesContext, MoviesContextProps } from '../App'
 
 const Poster: FC<{ src?: string; alt?: string; className?: string }> = ({ src, alt, className }): ReactElement => {
 	return (
@@ -21,25 +16,43 @@ const Poster: FC<{ src?: string; alt?: string; className?: string }> = ({ src, a
 }
 
 const Home = (): ReactElement => {
-	const [list, setList] = useState<MovieProps[] | []>([])
+	const [preloader, setPreloader] = useState<boolean>(false)
 
-	const getMovielist = async () => {
+	const { movies, setMovies } = useContext(MoviesContext) as MoviesContextProps
+
+	const getMovielist = async (title: string) => {
 		try {
-			const response = await fetch('http://localhost:3000/data/search.json', {
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			})
+			// const url = 'http://localhost:3000/data/search.json'
+			const url = `//www.omdbapi.com/?apikey=${process.env.REACT_APP_API_KEY}&s=${encodeURI(title)}`
+
+			setPreloader(true)
+			const response = await fetch(url)
 			const jsonData = await response.json()
-			setList(jsonData.Search)
+
+			setMovies(jsonData.Search)
+			setPreloader(false)
 		} catch (e) {
 			console.error(e)
+			setPreloader(false)
 		}
 	}
 
-	useEffect(() => {
-		getMovielist()
-	}, [])
+	const debounce = (fn: Function, wait: number) => {
+		let timeoutId: ReturnType<typeof setTimeout>
+
+		return function (this: any, ...args: any[]) {
+			clearTimeout(timeoutId)
+			timeoutId = setTimeout(() => fn.apply(this, args), wait)
+		}
+	}
+
+	const handleInputChange = useMemo(
+		() =>
+			debounce((e: any) => {
+				getMovielist(e.target.value)
+			}, 2000),
+		[]
+	)
 
 	return (
 		<>
@@ -47,15 +60,17 @@ const Home = (): ReactElement => {
 				<input
 					type="text"
 					placeholder="Search for a movie"
-					onChange={(e) => console.log(encodeURI(e.target.value))}
+					onChange={(e) => handleInputChange(e)}
 					className="flex w-full border px-[12px] py-[8px] border-gray-300 border-solid focus:border-yellow-400 focus:outline-0 placeholder:text-gray-400 rounded"
 				/>
+
+				{preloader && <div className="font-bold text-lg">Please, wait...</div>}
 			</div>
 
 			<div>
-				{list &&
-					list.length > 0 &&
-					list.map((item, index) => (
+				{movies &&
+					movies.length > 0 &&
+					movies.map((item: any, index: number) => (
 						<section key={index} className="flex py-[16px] border-0 border-gray-300 border-b last:border-b-0">
 							<Link to={item.imdbID} className="block shrink-0 w-[100px] mr-[16px]">
 								<Poster src={item.Poster} alt={item.Title} />
