@@ -23,7 +23,7 @@ const Home = (): ReactElement => {
 	const getMovielist = async (title: string) => {
 		try {
 			// const url = 'http://localhost:3000/data/search.json'
-			const url = `//www.omdbapi.com/?apikey=${process.env.REACT_APP_API_KEY}&s=${encodeURI(title)}`
+			const url = `//www.omdbapi.com/?apikey=1eec5ac4&s=${encodeURI(title)}`
 
 			setPreloader(true)
 			const response = await fetch(url)

@@ -7,6 +7,8 @@ interface MovieDetailsProps {
 	Director?: string
 	Plot?: string
 	Poster?: string
+	Response?: string
+	Error?: string
 }
 
 const Details = (): ReactElement => {
@@ -18,7 +20,7 @@ const Details = (): ReactElement => {
 	const getMovieDetails = async (id: string | undefined) => {
 		try {
 			// const url = 'http://localhost:3000/data/details.json'
-			const url = `//www.omdbapi.com/?apikey=${process.env.REACT_APP_API_KEY}&i=${id}`
+			const url = `//www.omdbapi.com/?apikey=1eec5ac4&i=${id}`
 
 			const response = await fetch(url)
 			const jsonData = await response.json()
@@ -35,7 +37,15 @@ const Details = (): ReactElement => {
 		getMovieDetails(id)
 	}, [id])
 
-	const { Title: title, Year: year, Director: director, Plot: plot, Poster: poster }: MovieDetailsProps = details || {}
+	const {
+		Title: title,
+		Year: year,
+		Director: director,
+		Plot: plot,
+		Poster: poster,
+		Response: response,
+		Error: error
+	}: MovieDetailsProps = details || {}
 
 	return (
 		<>
@@ -43,8 +53,12 @@ const Details = (): ReactElement => {
 				&larr; Back
 			</Link>
 
-			{Object.keys(details).length === 0 && details.constructor === Object ? (
-				<div>No information about this movie</div>
+			{(Object.keys(details).length === 0 && details.constructor === Object) || response === 'False' ? (
+				<>
+					<div>No information about this movie</div>
+
+					{error && <div>{error}</div>}
+				</>
 			) : (
 				<>
 					{title && <h1 className="text-2xl font-bold mb-[4px]">{title}</h1>}
